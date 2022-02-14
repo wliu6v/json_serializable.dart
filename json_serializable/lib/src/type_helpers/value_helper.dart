@@ -48,9 +48,35 @@ class ValueHelper extends TypeHelper {
       return '($expression as num$question)$question.toDouble()';
     } else if (simpleJsonTypeChecker.isAssignableFromType(targetType)) {
       final typeCode = typeToCode(targetType, forceNullable: defaultProvided);
-      return '$expression as $typeCode';
+
+      final utilMethod = jsonUtilMethodFromType(targetType);
+      if (utilMethod.isNotEmpty) {
+        if (targetType.isNullableType) {
+          return '${utilMethod}Nullable($expression)';
+        } else {
+          return '$utilMethod($expression)';
+        }
+      } else {
+        return '$expression as $typeCode';
+      }
     }
 
     return null;
+  }
+
+  String jsonUtilMethodFromType(DartType targetType) {
+    if (targetType.isDartCoreInt) {
+      return 'JsonUtil.parseInt';
+    } else if (targetType.isDartCoreString) {
+      return 'JsonUtil.parseString';
+    } else if (targetType.isDartCoreDouble) {
+      return 'JsonUtil.parseDouble';
+    } else if (targetType.isDartCoreBool) {
+      return 'JsonUtil.parseBool';
+    } else if (targetType.isDartCoreMap) {
+      return 'JsonUtil.parseMap';
+    } else {
+      return '';
+    }
   }
 }

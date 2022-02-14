@@ -76,6 +76,7 @@ class JsonHelper extends TypeHelper<TypeHelperContextWithConfig> {
       return null;
     }
 
+    /// 从这里可以将任意一个自定义类型进行判断是否需要转为 map
     final classElement = targetType.element;
 
     final fromJsonCtor = classElement.constructors
