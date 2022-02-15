@@ -4,7 +4,9 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
@@ -227,11 +229,17 @@ abstract class DecodeHelper implements HelperCore {
           'should only be true if `_generator.checked` is true.',
         );
 
-        value = deserialize(
-          readValueFunc == null
+        // TODO: 可以在这里替换掉默认的获取 json 的方法
+        String expression;
+        if (isCustomMap(targetType)) {
+          expression =
+              'JsonUtil.parseMap(json[$jsonKeyName], defaultValue: null)';
+        } else {
+          expression = readValueFunc == null
               ? 'json[$jsonKeyName]'
-              : '$readValueFunc(json, $jsonKeyName)',
-        );
+              : '$readValueFunc(json, $jsonKeyName)';
+        }
+        value = deserialize(expression);
       }
     } on UnsupportedTypeError catch (e) // ignore: avoid_catching_errors
     {
@@ -246,6 +254,31 @@ abstract class DecodeHelper implements HelperCore {
       }
     }
     return value;
+  }
+
+  bool isCustomMap(DartType targetType) {
+    if (targetType is! InterfaceType) {
+      return false;
+    }
+
+    final classElement = targetType.element;
+    final fromJsonCtor = classElement.constructors
+        .singleWhereOrNull((ce) => ce.name == 'fromJson');
+
+    if (fromJsonCtor != null) {
+      final positionalParams = fromJsonCtor.parameters
+          .where((element) => element.isPositional)
+          .toList();
+
+      if (positionalParams.isEmpty) {
+        return false;
+      }
+
+      var asCastType = positionalParams.first.type;
+      return asCastType.isDartCoreMap;
+    }
+
+    return false;
   }
 }
 

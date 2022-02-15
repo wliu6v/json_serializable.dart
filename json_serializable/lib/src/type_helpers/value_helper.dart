@@ -49,7 +49,7 @@ class ValueHelper extends TypeHelper {
     } else if (simpleJsonTypeChecker.isAssignableFromType(targetType)) {
       final typeCode = typeToCode(targetType, forceNullable: defaultProvided);
 
-      final String utilMethod = jsonUtilMethodFromType(targetType);
+      final utilMethod = jsonUtilMethodFromType(targetType);
       if (utilMethod.isNotEmpty) {
         if (targetType.isNullableType) {
           return '$utilMethod($expression, defaultValue: null)';
