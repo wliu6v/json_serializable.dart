@@ -75,39 +75,48 @@ class IterableHelper extends TypeHelper<TypeHelperContextWithConfig> {
 
     final itemSubVal = context.deserialize(iterableGenericType, closureArg)!;
 
-    var output = '$expression as List<dynamic>';
-
     final targetTypeIsNullable = defaultProvided || targetType.isNullableType;
 
+    var output;
     if (targetTypeIsNullable) {
-      output += '?';
+      output = 'JsonUtil.parseListNullable($expression, (e) => $itemSubVal)';
+    } else {
+      output = 'JsonUtil.parseList($expression, (e) => $itemSubVal)';
     }
-
-    // If `itemSubVal` is the same and it's not a Set, then we don't need to do
-    // anything fancy
-    if (closureArg == itemSubVal &&
-        !_coreSetChecker.isExactlyType(targetType)) {
-      return output;
-    }
-
-    output = '($output)';
-
-    var optionalQuestion = targetTypeIsNullable ? '?' : '';
-
-    if (closureArg != itemSubVal) {
-      final lambda = LambdaResult.process(itemSubVal);
-      output += '$optionalQuestion.map($lambda)';
-      // No need to include the optional question below – it was used here!
-      optionalQuestion = '';
-    }
-
-    if (_coreListChecker.isExactlyType(targetType)) {
-      output += '$optionalQuestion.toList()';
-    } else if (_coreSetChecker.isExactlyType(targetType)) {
-      output += '$optionalQuestion.toSet()';
-    }
-
     return output;
+
+    // var output = '$expression as List<dynamic>';
+
+    //
+    // if (targetTypeIsNullable) {
+    //   output += '?';
+    // }
+    //
+    // // If `itemSubVal` is the same and it's not a Set, then we don't need to do
+    // // anything fancy
+    // if (closureArg == itemSubVal &&
+    //     !_coreSetChecker.isExactlyType(targetType)) {
+    //   return output;
+    // }
+    //
+    // output = '($output)';
+    //
+    // var optionalQuestion = targetTypeIsNullable ? '?' : '';
+    //
+    // if (closureArg != itemSubVal) {
+    //   final lambda = LambdaResult.process(itemSubVal);
+    //   output += '$optionalQuestion.map($lambda)';
+    //   // No need to include the optional question below – it was used here!
+    //   optionalQuestion = '';
+    // }
+    //
+    // if (_coreListChecker.isExactlyType(targetType)) {
+    //   output += '$optionalQuestion.toList()';
+    // } else if (_coreSetChecker.isExactlyType(targetType)) {
+    //   output += '$optionalQuestion.toSet()';
+    // }
+    //
+    // return output;
   }
 }
 
