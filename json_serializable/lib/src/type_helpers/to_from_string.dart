@@ -5,8 +5,6 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
-import '../type_helper.dart';
-
 final bigIntString = ToFromStringHelper(
   'BigInt.parse',
   'toString()',
@@ -74,9 +72,15 @@ class ToFromStringHelper {
       return null;
     }
 
-    final parseParam = isString ? expression : '$expression as String';
+    if (nullable) {
+      return 'JsonUtil.parseDateNullable($expression)';
+    } else {
+      return 'JsonUtil.parseDate($expression)';
+    }
 
-    return commonNullPrefix(nullable, expression, '$_parse($parseParam)')
-        .toString();
+    // final parseParam = isString ? expression : '$expression as String';
+    //
+    // return commonNullPrefix(nullable, expression, '$_parse($parseParam)')
+    //     .toString();
   }
 }
