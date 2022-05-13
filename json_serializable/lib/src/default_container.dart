@@ -33,8 +33,14 @@ class DefaultContainer {
       return ifNullOrElse(value.expression, defaultValue, value.toString());
     }
 
+    // metaforo 采用 jsonutil 处理所有的取值，如果原值是非 nullable 的，就不要构造默认值上去。
+    // 非nullable 的分支在上面有处理，这里就不用重复加了。
     if (defaultValue != null) {
-      value = '$value ?? $defaultValue';
+      if (nullable) {
+        value = '$value ?? $defaultValue';
+      } else {
+        // do nothing.
+      }
     }
     return value;
   }
