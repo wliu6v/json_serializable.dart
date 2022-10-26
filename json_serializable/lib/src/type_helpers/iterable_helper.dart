@@ -77,7 +77,7 @@ class IterableHelper extends TypeHelper<TypeHelperContextWithConfig> {
 
     final targetTypeIsNullable = defaultProvided || targetType.isNullableType;
 
-    var output;
+    String output;
     if (targetTypeIsNullable) {
       output = 'JsonUtil.parseListNullable($expression, (e) => $itemSubVal)';
     } else {

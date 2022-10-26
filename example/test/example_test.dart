@@ -6,25 +6,41 @@ import 'dart:convert';
 
 import 'package:_json_serial_shared_test/shared_test.dart';
 import 'package:example/example.dart';
+import 'package:example/user.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('JsonSerializable', () {
-    final person = Person('Inigo', 'Montoya', DateTime(1560, 5, 5))
-      ..orders = [Order(DateTime.now())..item = (Item()..count = 42)];
+    String originJson = '{"id": 1,"name": "yanjun","avatar": "abc","type":3}';
+    final userA = User(
+      id: 1,
+      name: 'yanjun',
+      avatar: 'abc',
+      type: UserType.typeA,
+    );
 
-    final personJson = loudEncode(person);
+    final userJson = loudEncode(userA);
+    print(userJson);
 
-    final person2 =
-        Person.fromJson(json.decode(personJson) as Map<String, dynamic>);
+    final userB = User.fromJson(json.decode(originJson) as Map<String, dynamic>);
+    expect(userA.type, userB.type);
 
-    expect(person.firstName, person2.firstName);
-    expect(person.lastName, person2.lastName);
-    expect(person.dateOfBirth, person2.dateOfBirth);
-    expect(person.orders.single.date, person2.orders.single.date);
-    expect(person.orders.single.item!.count, 42);
 
-    expect(loudEncode(person2), equals(personJson));
+    // final person = Person('Inigo', 'Montoya', DateTime(1560, 5, 5))
+    //   ..orders = [Order(DateTime.now())..item = (Item()..count = 42)];
+    //
+    // final personJson = loudEncode(person);
+    //
+    // final person2 =
+    //     Person.fromJson(json.decode(personJson) as Map<String, dynamic>);
+    //
+    // expect(person.firstName, person2.firstName);
+    // expect(person.lastName, person2.lastName);
+    // expect(person.dateOfBirth, person2.dateOfBirth);
+    // expect(person.orders.single.date, person2.orders.single.date);
+    // expect(person.orders.single.item!.count, 42);
+    //
+    // expect(loudEncode(person2), equals(personJson));
   });
 
   test('JsonLiteral', () {

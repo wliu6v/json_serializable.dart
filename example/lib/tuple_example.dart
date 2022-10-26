@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:example/util/json_util.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'tuple_example.g.dart';
@@ -28,16 +29,16 @@ class Tuple<T, S> {
       _$TupleToJson(this, toJsonT, toJsonS);
 }
 
-@JsonSerializable()
-class ConcreteClass {
-  final Tuple<int, DateTime> tuple1;
-
-  final Tuple<Duration, BigInt> tuple2;
-
-  ConcreteClass(this.tuple1, this.tuple2);
-
-  factory ConcreteClass.fromJson(Map<String, dynamic> json) =>
-      _$ConcreteClassFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ConcreteClassToJson(this);
-}
+// @JsonSerializable()
+// class ConcreteClass {
+//   final Tuple<int, DateTime> tuple1;
+//
+//   final Tuple<Duration, BigInt> tuple2;
+//
+//   ConcreteClass(this.tuple1, this.tuple2);
+//
+//   factory ConcreteClass.fromJson(Map<String, dynamic> json) =>
+//       _$ConcreteClassFromJson(json);
+//
+//   Map<String, dynamic> toJson() => _$ConcreteClassToJson(this);
+// }

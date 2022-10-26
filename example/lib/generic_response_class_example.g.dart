@@ -8,28 +8,27 @@ part of 'generic_response_class_example.dart';
 
 BaseResponse<T> _$BaseResponseFromJson<T>(Map<String, dynamic> json) =>
     BaseResponse<T>(
-      status: json['status'] as int?,
-      msg: json['msg'] as String?,
+      status: JsonUtil.parseIntNullable(json['status']),
+      msg: JsonUtil.parseStringNullable(json['msg']),
       data: BaseResponse._dataFromJson(json['data'] as Object),
     );
 
 Article _$ArticleFromJson(Map<String, dynamic> json) => Article(
-      id: json['id'] as int,
-      title: json['title'] as String,
-      author: json['author'] == null
+      id: JsonUtil.parseInt(json['id']),
+      title: JsonUtil.parseString(json['title']),
+      author: JsonUtil.parseMapNullable(json['author']) == null
           ? null
-          : User.fromJson(json['author'] as Map<String, dynamic>),
-      comments: (json['comments'] as List<dynamic>?)
-          ?.map((e) => Comment.fromJson(e as Map<String, dynamic>))
-          .toList(),
+          : User.fromJson(JsonUtil.parseMapNullable(json['author'])!),
+      comments: JsonUtil.parseListNullable(
+          json['comments'], (e) => Comment.fromJson(e!)),
     );
 
 User _$UserFromJson(Map<String, dynamic> json) => User(
-      id: json['id'] as int?,
-      email: json['email'] as String?,
+      id: JsonUtil.parseIntNullable(json['id']),
+      email: JsonUtil.parseStringNullable(json['email']),
     );
 
 Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
-      id: json['id'] as int?,
-      content: json['content'] as String?,
+      id: JsonUtil.parseIntNullable(json['id']),
+      content: JsonUtil.parseStringNullable(json['content']),
     );

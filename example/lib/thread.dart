@@ -1,4 +1,5 @@
 import 'package:example/user.dart';
+import 'package:example/util/json_util.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'thread.g.dart';
@@ -13,6 +14,6 @@ class Info {
 
   Info(this.user, this.userList2, this.userQuesList3, this.userQuesList2);
 
-  factory Info.fromJson(dynamic json) => _$InfoFromJson(json);
+  factory Info.fromJson(Map<String, dynamic> json) => _$InfoFromJson(json);
   Map<String, dynamic> toJson() => _$InfoToJson(this);
 }
