@@ -5,6 +5,8 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
+import '../default_container.dart';
+
 final bigIntString = ToFromStringHelper(
   'BigInt.parse',
   'toString()',
@@ -46,11 +48,9 @@ class ToFromStringHelper {
 
   bool matches(DartType type) => _checker.isExactlyType(type);
 
-  String? serialize(
-    DartType type,
-    String expression,
-    bool nullable,
-  ) {
+  String? serialize(DartType type,
+      String expression,
+      bool nullable,) {
     if (!matches(type)) {
       return null;
     }
@@ -62,12 +62,10 @@ class ToFromStringHelper {
     return '$expression.$_toString';
   }
 
-  String? deserialize(
-    DartType type,
-    String expression,
-    bool nullable,
-    bool isString,
-  ) {
+  DefaultContainer? deserialize(DartType type,
+      String expression,
+      bool nullable,
+      bool isString,) {
     if (!matches(type)) {
       return null;
     }
@@ -78,9 +76,11 @@ class ToFromStringHelper {
       return 'JsonUtil.parseDate($expression)';
     }
 
-    // final parseParam = isString ? expression : '$expression as String';
+    // final output = '$_parse($parseParam)';
     //
-    // return commonNullPrefix(nullable, expression, '$_parse($parseParam)')
-    //     .toString();
-  }
+    // return DefaultContainer(
+    // expression,
+    // output,
+    // );
+    }
 }

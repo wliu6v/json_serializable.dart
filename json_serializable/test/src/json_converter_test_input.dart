@@ -174,18 +174,39 @@ Map<String, dynamic> _$JsonConverterOnGetterToJson(
 class JsonConverterOnGetter {
   @JsonKey()
   @_NeedsConversionConverter()
-  _NeedsConversion get annotatedGetter => _NeedsConversion();
+  NeedsConversion get annotatedGetter => NeedsConversion();
 }
 
-class _NeedsConversion {}
+class NeedsConversion {}
 
-class _NeedsConversionConverter
-    implements JsonConverter<_NeedsConversion, int> {
+class _NeedsConversionConverter implements JsonConverter<NeedsConversion, int> {
   const _NeedsConversionConverter();
 
   @override
-  _NeedsConversion fromJson(int json) => _NeedsConversion();
+  NeedsConversion fromJson(int json) => NeedsConversion();
 
   @override
-  int toJson(_NeedsConversion object) => 0;
+  int toJson(NeedsConversion object) => 0;
+}
+
+@ShouldThrow(
+  '''
+Could not generate `fromJson` code for `value`.
+To support the type `NeedsConversion` you can:
+$converterOrKeyInstructions''',
+)
+@_NullableConverter()
+@JsonSerializable()
+class JsonConverterNullableToNonNullable {
+  late NeedsConversion value;
+}
+
+class _NullableConverter implements JsonConverter<NeedsConversion?, Object?> {
+  const _NullableConverter();
+
+  @override
+  NeedsConversion? fromJson(Object? json) => null;
+
+  @override
+  Object? toJson(NeedsConversion? object) => null;
 }

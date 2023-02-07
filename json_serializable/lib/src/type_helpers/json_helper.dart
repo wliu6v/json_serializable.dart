@@ -284,7 +284,7 @@ ClassConfig? _annotation(ClassConfig config, InterfaceType source) {
   return mergeConfig(
     config,
     ConstantReader(annotations.single),
-    classElement: source.element,
+    classElement: source.element as ClassElement,
   );
 }
 

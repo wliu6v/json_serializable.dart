@@ -183,12 +183,13 @@ JsonConverterTestClass _$JsonConverterTestClassFromJson(Map json) =>
       json,
       ($checkedConvert) {
         final val = JsonConverterTestClass(
-          $checkedConvert(
-              'duration', (v) => durationConverter.fromJson(v as int?)),
+          $checkedConvert('duration',
+              (v) => const DurationMillisecondConverter().fromJson(v as int?)),
           $checkedConvert(
               'durationList',
               (v) => (v as List<dynamic>)
-                  .map((e) => durationConverter.fromJson(e as int?))
+                  .map((e) =>
+                      const DurationMillisecondConverter().fromJson(e as int?))
                   .toList()),
           $checkedConvert('bigInt',
               (v) => const BigIntStringConverter().fromJson(v as String)),
@@ -197,6 +198,18 @@ JsonConverterTestClass _$JsonConverterTestClassFromJson(Map json) =>
               (v) => (v as Map).map(
                     (k, e) => MapEntry(k as String,
                         const BigIntStringConverter().fromJson(e as String)),
+                  )),
+          $checkedConvert(
+              'nullableBigInt',
+              (v) => _$JsonConverterFromJson<String, BigInt>(
+                  v, const BigIntStringConverter().fromJson)),
+          $checkedConvert(
+              'nullableBigIntMap',
+              (v) => (v as Map).map(
+                    (k, e) => MapEntry(
+                        k as String,
+                        _$JsonConverterFromJson<String, BigInt>(
+                            e, const BigIntStringConverter().fromJson)),
                   )),
           $checkedConvert('numberSilly',
               (v) => TrivialNumberConverter.instance.fromJson(v as int?)),
@@ -208,6 +221,16 @@ JsonConverterTestClass _$JsonConverterTestClassFromJson(Map json) =>
                   .toSet()),
           $checkedConvert('dateTime',
               (v) => const EpochDateTimeConverter().fromJson(v as int?)),
+          $checkedConvert('trivialString',
+              (v) => trivialStringConverter.fromJson(v as String?)),
+          $checkedConvert('nullableNumberSilly',
+              (v) => TrivialNumberConverter.instance.fromJson(v as int?)),
+          $checkedConvert(
+              'nullableNumberSillySet',
+              (v) => (v as List<dynamic>)
+                  .map((e) =>
+                      TrivialNumberConverter.instance.fromJson(e as int?))
+                  .toSet()),
         );
         return val;
       },
@@ -216,19 +239,46 @@ JsonConverterTestClass _$JsonConverterTestClassFromJson(Map json) =>
 Map<String, dynamic> _$JsonConverterTestClassToJson(
         JsonConverterTestClass instance) =>
     <String, dynamic>{
-      'duration': durationConverter.toJson(instance.duration),
-      'durationList':
-          instance.durationList.map(durationConverter.toJson).toList(),
+      'duration':
+          const DurationMillisecondConverter().toJson(instance.duration),
+      'durationList': instance.durationList
+          .map(const DurationMillisecondConverter().toJson)
+          .toList(),
       'bigInt': const BigIntStringConverter().toJson(instance.bigInt),
       'bigIntMap': instance.bigIntMap
           .map((k, e) => MapEntry(k, const BigIntStringConverter().toJson(e))),
+      'nullableBigInt': _$JsonConverterToJson<String, BigInt>(
+          instance.nullableBigInt, const BigIntStringConverter().toJson),
+      'nullableBigIntMap': instance.nullableBigIntMap.map((k, e) => MapEntry(
+          k,
+          _$JsonConverterToJson<String, BigInt>(
+              e, const BigIntStringConverter().toJson))),
       'numberSilly':
           TrivialNumberConverter.instance.toJson(instance.numberSilly),
       'numberSillySet': instance.numberSillySet
           .map(TrivialNumberConverter.instance.toJson)
           .toList(),
       'dateTime': const EpochDateTimeConverter().toJson(instance.dateTime),
+      'trivialString': trivialStringConverter.toJson(instance.trivialString),
+      'nullableNumberSilly': _$JsonConverterToJson<int?, TrivialNumber>(
+          instance.nullableNumberSilly, TrivialNumberConverter.instance.toJson),
+      'nullableNumberSillySet': instance.nullableNumberSillySet
+          .map((e) => _$JsonConverterToJson<int?, TrivialNumber>(
+              e, TrivialNumberConverter.instance.toJson))
+          .toList(),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
 
 JsonConverterGeneric<S, T, U> _$JsonConverterGenericFromJson<S, T, U>(
         Map json) =>

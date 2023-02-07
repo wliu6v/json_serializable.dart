@@ -6,6 +6,8 @@ import 'package:meta/meta_meta.dart';
 
 import 'allowed_keys_helpers.dart';
 import 'checked_helpers.dart';
+import 'enum_helpers.dart';
+import 'json_converter.dart';
 import 'json_key.dart';
 
 part 'json_serializable.g.dart';
@@ -22,7 +24,11 @@ enum FieldRename {
   snake,
 
   /// Encodes a field named `pascalCase` with a JSON key `PascalCase`.
-  pascal
+  pascal,
+
+  /// Encodes a field named `screamingSnakeCase` with a JSON key
+  /// `SCREAMING_SNAKE_CASE`
+  screamingSnake,
 }
 
 /// An annotation used to specify a class to generate code for.
@@ -73,6 +79,20 @@ class JsonSerializable {
   /// }
   /// ```
   final bool? createFactory;
+
+  /// If `true` (defaults to false), a private, static `_$ExampleJsonMeta`
+  /// constant is created in the generated part file.
+  ///
+  /// This constant can be used by other code-generators to support features
+  /// such as [fieldRename].
+  final bool? createFieldMap;
+
+  /// If `true` (defaults to false), a private, static `_$ExamplePerFieldToJson`
+  /// abstract class will be geenrated in the part file.
+  ///
+  /// This abstract class will contain one static function per property,
+  /// exposing a way to encode only this property instead of the entire object.
+  final bool? createPerFieldToJson;
 
   /// If `true` (the default), A top-level function is created that you can
   /// reference from your class.
@@ -173,7 +193,7 @@ class JsonSerializable {
   /// generated.
   ///
   /// It will have the same effect as if those fields had been annotated with
-  /// `@JsonKey(ignore: true)`.
+  /// [JsonKey.includeToJson] and [JsonKey.includeFromJson] set to `false`
   final bool? ignoreUnannotated;
 
   /// Whether the generator should include fields with `null` values in the
@@ -186,12 +206,47 @@ class JsonSerializable {
   /// `includeIfNull`, that value takes precedent.
   final bool? includeIfNull;
 
+  /// A list of [JsonConverter] to apply to this class.
+  ///
+  /// Writing:
+  ///
+  /// ```dart
+  /// @JsonSerializable(converters: [MyJsonConverter()])
+  /// class Example {...}
+  /// ```
+  ///
+  /// is equivalent to writing:
+  ///
+  /// ```dart
+  /// @JsonSerializable()
+  /// @MyJsonConverter()
+  /// class Example {...}
+  /// ```
+  ///
+  /// The main difference is that this allows reusing a custom
+  /// [JsonSerializable] over multiple classes:
+  ///
+  /// ```dart
+  /// const myCustomAnnotation = JsonSerializable(
+  ///   converters: [MyJsonConverter()],
+  /// );
+  ///
+  /// @myCustomAnnotation
+  /// class Example {...}
+  ///
+  /// @myCustomAnnotation
+  /// class Another {...}
+  /// ```
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final List<JsonConverter>? converters;
+
   /// Creates a new [JsonSerializable] instance.
   const JsonSerializable({
     @Deprecated('Has no effect') bool? nullable,
     this.anyMap,
     this.checked,
     this.constructor,
+    this.createFieldMap,
     this.createFactory,
     this.createToJson,
     this.disallowUnrecognizedKeys,
@@ -199,7 +254,9 @@ class JsonSerializable {
     this.fieldRename,
     this.ignoreUnannotated,
     this.includeIfNull,
+    this.converters,
     this.genericArgumentFactories,
+    this.createPerFieldToJson,
   });
 
   factory JsonSerializable.fromJson(Map<String, dynamic> json) =>

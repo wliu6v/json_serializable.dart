@@ -32,13 +32,14 @@ Never throwUnsupported(FieldElement element, String message) =>
       element: element,
     );
 
-FieldRename? _fromDartObject(ConstantReader reader) => reader.isNull
-    ? null
-    : enumValueForDartObject(
-        reader.objectValue,
-        FieldRename.values,
-        (f) => f.toString().split('.')[1],
-      );
+T? readEnum<T extends Enum>(ConstantReader reader, List<T> values) =>
+    reader.isNull
+        ? null
+        : enumValueForDartObject<T>(
+            reader.objectValue,
+            values,
+            (f) => f.name,
+          );
 
 T enumValueForDartObject<T>(
   DartObject source,
@@ -56,17 +57,20 @@ JsonSerializable _valueForAnnotation(ConstantReader reader) => JsonSerializable(
       constructor: reader.read('constructor').literalValue as String?,
       createFactory: reader.read('createFactory').literalValue as bool?,
       createToJson: reader.read('createToJson').literalValue as bool?,
+      createFieldMap: reader.read('createFieldMap').literalValue as bool?,
+      createPerFieldToJson:
+          reader.read('createPerFieldToJson').literalValue as bool?,
       disallowUnrecognizedKeys:
           reader.read('disallowUnrecognizedKeys').literalValue as bool?,
       explicitToJson: reader.read('explicitToJson').literalValue as bool?,
-      fieldRename: _fromDartObject(reader.read('fieldRename')),
+      fieldRename: readEnum(reader.read('fieldRename'), FieldRename.values),
       genericArgumentFactories:
           reader.read('genericArgumentFactories').literalValue as bool?,
       ignoreUnannotated: reader.read('ignoreUnannotated').literalValue as bool?,
       includeIfNull: reader.read('includeIfNull').literalValue as bool?,
     );
 
-/// Returns a [JsonSerializable] with values from the [JsonSerializable]
+/// Returns a [ClassConfig] with values from the [JsonSerializable]
 /// instance represented by [reader].
 ///
 /// For fields that are not defined in [JsonSerializable] or `null` in [reader],
@@ -93,12 +97,17 @@ ClassConfig mergeConfig(
           .where((element) => element.hasDefaultValue)
           .map((e) => MapEntry(e.name, e.defaultValueCode!)));
 
+  final converters = reader.read('converters');
+
   return ClassConfig(
     anyMap: annotation.anyMap ?? config.anyMap,
     checked: annotation.checked ?? config.checked,
     constructor: constructor,
     createFactory: annotation.createFactory ?? config.createFactory,
     createToJson: annotation.createToJson ?? config.createToJson,
+    createFieldMap: annotation.createFieldMap ?? config.createFieldMap,
+    createPerFieldToJson:
+        annotation.createPerFieldToJson ?? config.createPerFieldToJson,
     disallowUnrecognizedKeys:
         annotation.disallowUnrecognizedKeys ?? config.disallowUnrecognizedKeys,
     explicitToJson: annotation.explicitToJson ?? config.explicitToJson,
@@ -109,6 +118,7 @@ ClassConfig mergeConfig(
     ignoreUnannotated: annotation.ignoreUnannotated ?? config.ignoreUnannotated,
     includeIfNull: annotation.includeIfNull ?? config.includeIfNull,
     ctorParamDefaults: paramDefaultValueMap,
+    converters: converters.isNull ? const [] : converters.listValue,
   );
 }
 
@@ -155,8 +165,8 @@ ConstructorElement constructorByName(ClassElement classElement, String name) {
 ///
 /// Otherwise, `null`.
 Iterable<FieldElement>? iterateEnumFields(DartType targetType) {
-  if (targetType is InterfaceType && targetType.element.isEnum) {
-    return targetType.element.fields.where((element) => !element.isSynthetic);
+  if (targetType is InterfaceType && targetType.element is EnumElement) {
+    return targetType.element.fields.where((element) => element.isEnumConstant);
   }
   return null;
 }
@@ -178,6 +188,8 @@ String encodedFieldName(
       return declaredName;
     case FieldRename.snake:
       return declaredName.snake;
+    case FieldRename.screamingSnake:
+      return declaredName.snake.toUpperCase();
     case FieldRename.kebab:
       return declaredName.kebab;
     case FieldRename.pascal:
@@ -221,6 +233,14 @@ extension ExecutableElementExtension on ExecutableElement {
     }
 
     if (this is MethodElement) {
+      return '${enclosingElement.name}.$name';
+    }
+
+    if (this is ConstructorElement) {
+      // Ignore the default constructor.
+      if (name.isEmpty) {
+        return '${enclosingElement.name}';
+      }
       return '${enclosingElement.name}.$name';
     }
 

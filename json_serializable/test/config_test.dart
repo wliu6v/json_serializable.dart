@@ -3,6 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 @TestOn('vm')
+library test;
+
 import 'dart:io';
 
 import 'package:build/build.dart';
@@ -120,10 +122,14 @@ void main() {
           case 'field_rename':
             lastLine =
                 '`42` is not one of the supported values: none, kebab, snake, '
-                'pascal';
+                'pascal, screamingSnake';
             break;
           case 'constructor':
             lastLine = "type 'int' is not a subtype of type 'String?' in type "
+                'cast';
+            break;
+          case 'create_to_json':
+            lastLine = "type 'int' is not a subtype of type 'bool?' in type "
                 'cast';
             break;
           default:
@@ -152,6 +158,8 @@ const _invalidConfig = {
   'checked': 42,
   'constructor': 42,
   'create_factory': 42,
+  'create_field_map': 42,
+  'create_per_field_to_json': 42,
   'create_to_json': 42,
   'disallow_unrecognized_keys': 42,
   'explicit_to_json': 42,

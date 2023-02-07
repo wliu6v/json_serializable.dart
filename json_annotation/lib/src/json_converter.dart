@@ -8,6 +8,36 @@
 ///
 /// [S] is the type of the value stored in JSON. It must be a valid JSON type
 /// such as [String], [int], or [Map<String, dynamic>].
+///
+///
+/// [JsonConverter]s can be placed either on the class:
+///
+/// ```dart
+/// class MyJsonConverter extends JsonConverter<Value, JSON> {
+///   // TODO
+/// }
+///
+/// @JsonSerializable()
+/// @MyJsonConverter()
+/// class Example {}
+/// ```
+///
+/// or on a property:
+///
+/// ```dart
+/// @JsonSerializable()
+/// class Example {
+///   @MyJsonConverter()
+///   final Value property;
+/// }
+/// ```
+///
+/// Or finally, passed to the `@JsonSerializable` annotation:
+///
+/// ```dart
+/// @JsonSerializable(converters: [MyJsonConverter()])
+/// class Example {}
+/// ```
 abstract class JsonConverter<T, S> {
   const JsonConverter();
 

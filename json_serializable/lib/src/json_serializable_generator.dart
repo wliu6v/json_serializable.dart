@@ -20,7 +20,7 @@ class JsonSerializableGenerator
     extends GeneratorForAnnotation<JsonSerializable> {
   final Settings _settings;
 
-  JsonSerializable get config => _settings.config;
+  JsonSerializable get config => _settings.config.toJsonSerializable();
 
   JsonSerializableGenerator.fromSettings(this._settings);
 
@@ -69,7 +69,7 @@ class JsonSerializableGenerator
       );
     }
 
-    if (element is! ClassElement || element.isEnum) {
+    if (element is! ClassElement || element is EnumElement) {
       throw InvalidGenerationSourceError(
         '`@JsonSerializable` can only be used on classes.',
         element: element,

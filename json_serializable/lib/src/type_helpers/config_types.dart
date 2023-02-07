@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 /// Represents values from [JsonKey] when merged with local configuration.
@@ -10,9 +11,11 @@ class KeyConfig {
 
   final bool disallowNullValue;
 
-  final bool ignore;
+  final bool? includeFromJson;
 
   final bool includeIfNull;
+
+  final bool? includeToJson;
 
   final String name;
 
@@ -25,8 +28,9 @@ class KeyConfig {
   KeyConfig({
     required this.defaultValue,
     required this.disallowNullValue,
-    required this.ignore,
+    required this.includeFromJson,
     required this.includeIfNull,
+    required this.includeToJson,
     required this.name,
     required this.readValueFunctionName,
     required this.required,
@@ -38,41 +42,22 @@ class KeyConfig {
 /// configuration.
 ///
 /// Values are all known, so types are non-nullable.
-class ClassConfig implements JsonSerializable {
-  @override
+class ClassConfig {
   final bool anyMap;
-
-  @override
   final bool checked;
-
-  @override
   final String constructor;
-
-  @override
   final bool createFactory;
-
-  @override
   final bool createToJson;
-
-  @override
+  final bool createFieldMap;
+  final bool createPerFieldToJson;
   final bool disallowUnrecognizedKeys;
-
-  @override
   final bool explicitToJson;
-
-  @override
   final FieldRename fieldRename;
-
-  @override
   final bool genericArgumentFactories;
-
-  @override
   final bool ignoreUnannotated;
-
-  @override
   final bool includeIfNull;
-
   final Map<String, String> ctorParamDefaults;
+  final List<DartObject> converters;
 
   const ClassConfig({
     required this.anyMap,
@@ -80,14 +65,44 @@ class ClassConfig implements JsonSerializable {
     required this.constructor,
     required this.createFactory,
     required this.createToJson,
+    required this.createFieldMap,
+    required this.createPerFieldToJson,
     required this.disallowUnrecognizedKeys,
     required this.explicitToJson,
     required this.fieldRename,
     required this.genericArgumentFactories,
     required this.ignoreUnannotated,
     required this.includeIfNull,
+    this.converters = const [],
     this.ctorParamDefaults = const {},
   });
+
+  factory ClassConfig.fromJsonSerializable(JsonSerializable config) =>
+      // #CHANGE WHEN UPDATING json_annotation
+      ClassConfig(
+        checked: config.checked ?? ClassConfig.defaults.checked,
+        anyMap: config.anyMap ?? ClassConfig.defaults.anyMap,
+        constructor: config.constructor ?? ClassConfig.defaults.constructor,
+        createFieldMap:
+            config.createFieldMap ?? ClassConfig.defaults.createFieldMap,
+        createPerFieldToJson: config.createPerFieldToJson ??
+            ClassConfig.defaults.createPerFieldToJson,
+        createFactory:
+            config.createFactory ?? ClassConfig.defaults.createFactory,
+        createToJson: config.createToJson ?? ClassConfig.defaults.createToJson,
+        ignoreUnannotated:
+            config.ignoreUnannotated ?? ClassConfig.defaults.ignoreUnannotated,
+        explicitToJson:
+            config.explicitToJson ?? ClassConfig.defaults.explicitToJson,
+        includeIfNull:
+            config.includeIfNull ?? ClassConfig.defaults.includeIfNull,
+        genericArgumentFactories: config.genericArgumentFactories ??
+            ClassConfig.defaults.genericArgumentFactories,
+        fieldRename: config.fieldRename ?? ClassConfig.defaults.fieldRename,
+        disallowUnrecognizedKeys: config.disallowUnrecognizedKeys ??
+            ClassConfig.defaults.disallowUnrecognizedKeys,
+        // TODO typeConverters = []
+      );
 
   /// An instance of [JsonSerializable] with all fields set to their default
   /// values.
@@ -97,6 +112,8 @@ class ClassConfig implements JsonSerializable {
     constructor: '',
     createFactory: true,
     createToJson: true,
+    createFieldMap: false,
+    createPerFieldToJson: false,
     disallowUnrecognizedKeys: false,
     explicitToJson: false,
     fieldRename: FieldRename.none,
@@ -105,32 +122,20 @@ class ClassConfig implements JsonSerializable {
     includeIfNull: true,
   );
 
-  @override
-  Map<String, dynamic> toJson() => _$JsonSerializableToJson(this);
-
-  @override
-  JsonSerializable withDefaults() => this;
+  JsonSerializable toJsonSerializable() => JsonSerializable(
+        checked: checked,
+        anyMap: anyMap,
+        constructor: constructor,
+        createFactory: createFactory,
+        createToJson: createToJson,
+        createFieldMap: createFieldMap,
+        createPerFieldToJson: createPerFieldToJson,
+        ignoreUnannotated: ignoreUnannotated,
+        explicitToJson: explicitToJson,
+        includeIfNull: includeIfNull,
+        genericArgumentFactories: genericArgumentFactories,
+        fieldRename: fieldRename,
+        disallowUnrecognizedKeys: disallowUnrecognizedKeys,
+        // TODO typeConverters = []
+      );
 }
-
-const _$FieldRenameEnumMap = {
-  FieldRename.none: 'none',
-  FieldRename.kebab: 'kebab',
-  FieldRename.snake: 'snake',
-  FieldRename.pascal: 'pascal',
-};
-
-// #CHANGE WHEN UPDATING json_annotation
-Map<String, dynamic> _$JsonSerializableToJson(JsonSerializable instance) =>
-    <String, dynamic>{
-      'any_map': instance.anyMap,
-      'checked': instance.checked,
-      'constructor': instance.constructor,
-      'create_factory': instance.createFactory,
-      'create_to_json': instance.createToJson,
-      'disallow_unrecognized_keys': instance.disallowUnrecognizedKeys,
-      'explicit_to_json': instance.explicitToJson,
-      'field_rename': _$FieldRenameEnumMap[instance.fieldRename],
-      'generic_argument_factories': instance.genericArgumentFactories,
-      'ignore_unannotated': instance.ignoreUnannotated,
-      'include_if_null': instance.includeIfNull,
-    };
