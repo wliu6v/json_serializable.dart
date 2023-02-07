@@ -70,17 +70,17 @@ class ToFromStringHelper {
       return null;
     }
 
+    String output;
     if (nullable) {
-      return 'JsonUtil.parseDateNullable($expression)';
+      output = 'JsonUtil.parseDateNullable($expression)';
     } else {
-      return 'JsonUtil.parseDate($expression)';
+      output = 'JsonUtil.parseDate($expression)';
     }
 
     // final output = '$_parse($parseParam)';
-    //
-    // return DefaultContainer(
-    // expression,
-    // output,
-    // );
-    }
+    return DefaultContainer(
+      expression,
+      output,
+    );
+  }
 }
